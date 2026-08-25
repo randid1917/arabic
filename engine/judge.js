@@ -13,6 +13,18 @@ export function lev(a,b){
   return d[m][n];
 }
 const sortedChars = s => s.replace(/\s/g,"").split("").sort().join("");
+const despace = s => s.replace(/\s/g,"");
+
+// The b- of the habitual and the negator ma are grammar, not spelling. A
+// difference in either is always a real miss however small the edit distance:
+// `ra7 brou7` for `ra7 rou7` is exactly the error these drills exist to catch,
+// and it sits one character from correct. Counted, not aligned, so a missing
+// space cannot shift the reading.
+const markers = s => {
+  const w = normalise(s).split(" ").filter(Boolean);
+  return w.filter(x => x === "ma").length + ":" +
+         w.filter(x => x !== "ma" && x.startsWith("b")).length;
+};
 
 // "typing tax": one transposition or one doubled/dropped letter in a word
 // he plainly knows. Not a knowledge error — must not be scored as one.
@@ -21,6 +33,10 @@ export function judge(given, accept){
   for(const a of accept){
     const t = normalise(a);
     if(g === t) return {state:"correct", target:a};
+    // same letters in the same order, spaced differently — a thumb slip
+    if(despace(g) === despace(t)) return {state:"tax", target:a};
+    // a b-/ma difference is never excused, so it never reaches the distance test
+    if(markers(g) !== markers(t)) continue;
     const dist = lev(g,t);
     if(dist <= 1) return {state:"tax", target:a};
     if(dist === 2 && sortedChars(g) === sortedChars(t)) return {state:"tax", target:a};
