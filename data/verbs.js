@@ -5,15 +5,16 @@
    [ana, inta, inte, huwwe, hiyye, ne7na, into, hinne]
    =================================================================== */
 
+// `ar` is the independent subject pronoun, in the paradigm order named above.
 export const PERSONS = [
-  {i:0, en:"I",       has:"have", is3:false, fii:"fiini"},
-  {i:1, en:"you",     has:"have", is3:false, fii:"fiik"},
-  {i:2, en:"you (f)", has:"have", is3:false, fii:"fiike"},
-  {i:3, en:"he",      has:"has",  is3:true,  fii:"fii"},
-  {i:4, en:"she",     has:"has",  is3:true,  fii:"fiya"},
-  {i:5, en:"we",      has:"have", is3:false, fii:"fiina"},
-  {i:6, en:"you all", has:"have", is3:false, fii:"fiikon"},
-  {i:7, en:"they",    has:"have", is3:false, fii:"fiyon"}
+  {i:0, ar:"ana",   en:"I",       has:"have", is3:false, fii:"fiini"},
+  {i:1, ar:"inta",  en:"you",     has:"have", is3:false, fii:"fiik"},
+  {i:2, ar:"inte",  en:"you (f)", has:"have", is3:false, fii:"fiike"},
+  {i:3, ar:"huwwe", en:"he",      has:"has",  is3:true,  fii:"fii"},
+  {i:4, ar:"hiyye", en:"she",     has:"has",  is3:true,  fii:"fiya"},
+  {i:5, ar:"ne7na", en:"we",      has:"have", is3:false, fii:"fiina"},
+  {i:6, ar:"into",  en:"you all", has:"have", is3:false, fii:"fiikon"},
+  {i:7, ar:"hinne", en:"they",    has:"have", is3:false, fii:"fiyon"}
 ];
 // Feminine address (inte) is off by default — masculine forms only.
 export const ACTIVE_PERSONS = [0,1,3,4,5,6,7];

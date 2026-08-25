@@ -45,6 +45,11 @@ const pick = a => a[Math.floor(Math.random()*a.length)];
 
 function personFor(){ return PERSONS[pick(ACTIVE_PERSONS)]; }
 
+// The verb ending already carries the person, so the independent pronoun is
+// optional: `ru7t` and `ana ru7t` are both right. Accept either. A pronoun
+// that disagrees with the verb is simply not in the list, so it still misses.
+const withPronoun = (p, core) => [core, `${p.ar} ${core}`];
+
 function noteFor(c, v, p){
   if(c.slot==="bare" && c.id!=="past") return NOTES.modal;
   if(c.slot==="past" && v.hollow){
@@ -64,7 +69,7 @@ export function conjugationDrill(){
   return {
     eyebrow: c.label,
     prompt: c.en(v,p),
-    accept: [answer],
+    accept: withPronoun(p, answer),
     note: noteFor(c,v,p),
     tag: c.id
   };
@@ -79,8 +84,8 @@ export function sentenceDrill(){
   return {
     eyebrow: `${c.label} · full sentence`,
     prompt: `${cap(c.timeEn)}, ${c.en(v,p)} ${comp.en}.`,
-    // both word orders are natural — accept either
-    accept: [`${c.time} ${core}`, `${core} ${c.time}`],
+    // both word orders are natural, and the pronoun is optional in each
+    accept: withPronoun(p, core).flatMap(x => [`${c.time} ${x}`, `${x} ${c.time}`]),
     note: noteFor(c,v,p) + " " + NOTES.order,
     tag: c.id
   };
