@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { VERBS, PERSONS, ACTIVE_PERSONS, NOTES } from "../data/verbs.js";
 import { CONSTRUCTIONS, conjugationDrill, sentenceDrill } from "../engine/generator.js";
 import { normalise, lev, judge } from "../engine/judge.js";
+import { readFileSync, readdirSync } from "node:fs";
 
 const PARADIGMS = ["past", "bare", "bform"];
 
@@ -216,12 +217,90 @@ test("wrong answers report the first accepted form as the target", () => {
   assert.equal(judge("zzzz", ["ra7 rou7", "rou7 ra7"]).target, "ra7 rou7");
 });
 
+/* ---------- optional subject pronouns ---------- */
+
+test("every person carries a unique pronoun matching the paradigm comment", () => {
+  const header = readFileSync(new URL("../data/verbs.js", import.meta.url), "utf8")
+    .match(/\[(ana[^\]]*)\]/)[1].split(",").map(x => x.trim());
+  assert.deepEqual(PERSONS.map(p => p.ar), header,
+    "PERSONS[].ar has drifted from the paradigm order named in the comment");
+  const prons = PERSONS.map(p => p.ar);
+  assert.equal(new Set(prons).size, prons.length, "two persons share a pronoun");
+  for (const p of PERSONS) {
+    assert.notEqual(p.ar.trim(), "", `person ${p.i} has no pronoun`);
+    assert.ok(!OFFENDING.test(p.ar), `pronoun ${JSON.stringify(p.ar)} breaks the transcription rules`);
+  }
+});
+
+// The verb ending already names the person, so both are right.
+test("the pronoun is optional on every construction x verb x active person", () => {
+  for (const c of CONSTRUCTIONS)
+    for (const v of VERBS)
+      for (const pi of ACTIVE_PERSONS) {
+        const p = PERSONS[pi];
+        const answer = c.build(v, p);
+        const accept = [answer, `${p.ar} ${answer}`];
+        assert.equal(judge(answer, accept).state, "correct",
+          `bare ${answer} rejected for ${c.id}/${v.id}/${p.en}`);
+        assert.equal(judge(`${p.ar} ${answer}`, accept).state, "correct",
+          `${p.ar} ${answer} rejected for ${c.id}/${v.id}/${p.en}`);
+      }
+});
+
+// inta/inte/into sit one edit apart, so without the pronoun check the distance
+// test would wave a disagreeing pronoun through as a slip.
+test("naming a different pronoun is a miss, never tax", () => {
+  for (const c of CONSTRUCTIONS)
+    for (const v of VERBS)
+      for (const pi of ACTIVE_PERSONS) {
+        const p = PERSONS[pi];
+        const answer = c.build(v, p);
+        const accept = [answer, `${p.ar} ${answer}`];
+        for (const other of PERSONS) {
+          if (other.ar === p.ar) continue;
+          assert.equal(judge(`${other.ar} ${answer}`, accept).state, "wrong",
+            `${other.ar} ${answer} was excused for ${c.id}/${v.id}/${p.en}`);
+        }
+      }
+});
+
+test("a slip inside the pronoun is still typing tax", () => {
+  const accept = ["ru7t", "inta ru7t"];
+  assert.equal(judge("intaa ru7t", accept).state, "tax");   // doubled
+  assert.equal(judge("int ru7t", accept).state, "tax");     // dropped
+  assert.equal(judge("intaru7t", accept).state, "tax");     // missing space
+  assert.equal(judge("inta ru7d", accept).state, "tax");    // slip in the verb
+});
+
+test("a pronoun never rescues a b-/ma/mn- miss", () => {
+  assert.equal(judge("ana brou7", ["rou7", "ana rou7"]).state, "wrong");
+  assert.equal(judge("ne7na nrou7", ["mnrou7", "ne7na mnrou7"]).state, "wrong");
+  assert.equal(judge("ana ru7t", ["ma ru7t", "ana ma ru7t"]).state, "wrong");
+});
+
+test("conjugation drills accept 2 forms, sentence drills 4, none duplicated", () => {
+  for (let i = 0; i < 300; i++) {
+    const c = conjugationDrill(), s = sentenceDrill();
+    assert.equal(c.accept.length, 2, "conjugation should accept bare + pronoun");
+    assert.equal(s.accept.length, 4, "sentence should accept 2 orders x 2 pronoun states");
+    for (const d of [c, s])
+      assert.equal(new Set(d.accept).size, d.accept.length,
+        `duplicate accepted form: ${JSON.stringify(d.accept)}`);
+  }
+});
+
+test("the bare form stays the answer shown on a miss", () => {
+  for (let i = 0; i < 200; i++)
+    for (const d of [conjugationDrill(), sentenceDrill()])
+      assert.ok(!PERSONS.some(p => d.accept[0].split(" ").includes(p.ar)),
+        `accept[0] should be the pronoun-less form, got ${d.accept[0]}`);
+});
+
 /* ---------- offline shell ---------- */
 
 // There is no build step, so sw.js lists its assets by hand and nothing stops
 // a new module from being added and silently left out of the cache. This walks
 // the repo and insists the two agree.
-import { readFileSync, readdirSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 

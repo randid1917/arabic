@@ -7,7 +7,7 @@
    by hand. Change any asset -> bump CACHE, or the old copy is served.
    =================================================================== */
 
-const CACHE = "drills-v2";
+const CACHE = "drills-v3";
 
 const PRECACHE = [
   "./",
