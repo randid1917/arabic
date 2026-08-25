@@ -1,0 +1,106 @@
+/* ---------- tokens ---------- */
+:root{
+  --ground:#10262B;      /* deep petrol */
+  --surface:#16333A;
+  --surface-2:#1D414A;
+  --line:#2A5560;
+  --limestone:#E8E2D4;
+  --muted:#8FAAAF;
+  --ochre:#D9A441;       /* the "typing tax" state */
+  --seaglass:#6FB3A8;    /* correct */
+  --clay:#C8553D;        /* wrong */
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ground);
+  color:var(--limestone);
+  font-family:var(--sans);
+  -webkit-text-size-adjust:100%;
+  min-height:100dvh;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+.wrap{max-width:640px;margin:0 auto;padding:18px 18px 40px}
+
+/* ---------- header ---------- */
+.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px}
+.mark{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.count{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.rail{display:flex;gap:3px;margin-bottom:22px}
+.tick{flex:1;height:3px;background:var(--surface-2);border-radius:2px}
+.tick.hit{background:var(--seaglass)}
+.tick.tax{background:var(--ochre)}
+.tick.miss{background:var(--clay)}
+.tick.now{background:var(--limestone)}
+
+/* ---------- mode tabs ---------- */
+.tabs{display:flex;gap:8px;margin-bottom:22px}
+.tab{
+  flex:1;padding:10px 8px;background:transparent;color:var(--muted);
+  border:1px solid var(--line);border-radius:2px;font-family:var(--sans);
+  font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;
+  cursor:pointer;
+}
+.tab[aria-selected="true"]{background:var(--surface-2);color:var(--limestone);border-color:var(--surface-2)}
+
+/* ---------- prompt ---------- */
+.eyebrow{
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ochre);font-weight:700;margin-bottom:10px
+}
+.prompt{
+  font-size:29px;line-height:1.2;font-weight:650;letter-spacing:-.02em;
+  margin:0 0 22px;
+}
+.prompt .lit{color:var(--muted);font-weight:400}
+
+/* ---------- input ---------- */
+.field{
+  width:100%;padding:15px 14px;background:var(--surface);
+  border:1px solid var(--line);border-top-width:2px;border-radius:2px;
+  color:var(--limestone);font-family:var(--mono);font-size:20px;
+  letter-spacing:.01em;
+}
+.field:focus{outline:2px solid var(--ochre);outline-offset:2px;border-color:var(--ochre)}
+.field::placeholder{color:#5C7C82}
+.field:disabled{opacity:.55}
+.go{
+  width:100%;margin-top:12px;padding:16px;border:0;border-radius:2px;
+  background:var(--limestone);color:var(--ground);
+  font-family:var(--sans);font-size:15px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
+}
+.go:active{transform:translateY(1px)}
+.hint{margin-top:10px;font-size:12px;color:var(--muted);font-family:var(--mono)}
+
+/* ---------- feedback ---------- */
+.fb{margin-top:24px;border-left:2px solid var(--line);padding-left:14px}
+.fb.correct{border-color:var(--seaglass)}
+.fb.tax{border-color:var(--ochre)}
+.fb.wrong{border-color:var(--clay)}
+.fb .q{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.4}
+.fb .row{display:flex;gap:9px;align-items:flex-start;margin-bottom:9px;font-size:16px;line-height:1.4}
+.fb .row .sym{flex:none;width:20px}
+.fb .row .val{font-family:var(--mono);word-break:break-word}
+.fb .bad{color:var(--clay)}
+.fb .good{color:var(--seaglass)}
+.fb .taxc{color:var(--ochre)}
+.fb .why{font-size:14px;color:var(--limestone);opacity:.85;line-height:1.5}
+.fb .why b{color:var(--ochre);font-weight:600}
+
+/* ---------- score ---------- */
+.score{padding:4px 0}
+.score h2{font-size:34px;margin:0 0 4px;letter-spacing:-.02em}
+.score .sub{color:var(--muted);font-size:14px;margin-bottom:26px}
+.bd{border-top:1px solid var(--line);padding:13px 0;display:flex;justify-content:space-between;font-size:15px}
+.bd .n{font-family:var(--mono)}
+.leak{margin-top:26px}
+.leak h3{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ochre);margin:0 0 10px}
+.leak li{font-family:var(--mono);font-size:14px;margin-bottom:7px;color:var(--limestone)}
+.leak ul{margin:0;padding-left:18px}
+@media (prefers-reduced-motion:no-preference){
+  .fb,.prompt{animation:in .18s ease-out}
+  @keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+}
