@@ -215,3 +215,59 @@ test("a genuinely different word is wrong", () => {
 test("wrong answers report the first accepted form as the target", () => {
   assert.equal(judge("zzzz", ["ra7 rou7", "rou7 ra7"]).target, "ra7 rou7");
 });
+
+/* ---------- offline shell ---------- */
+
+// There is no build step, so sw.js lists its assets by hand and nothing stops
+// a new module from being added and silently left out of the cache. This walks
+// the repo and insists the two agree.
+import { readFileSync, readdirSync } from "node:fs";
+import { join, relative } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT = fileURLToPath(new URL("..", import.meta.url));
+
+// not part of the installed app: the frozen prototype, the tests, the notes,
+// and sw.js itself, which the browser fetches outside the cache it manages
+const NOT_SHIPPED = new Set(["drills.html", "sw.js", "CLAUDE.md"]);
+const NOT_SHIPPED_DIRS = new Set([".git", "test", "node_modules"]);
+
+const walk = dir => readdirSync(dir, { withFileTypes: true }).flatMap(e => {
+  if (e.isDirectory())
+    return NOT_SHIPPED_DIRS.has(e.name) ? [] : walk(join(dir, e.name));
+  return [relative(ROOT, join(dir, e.name)).split("\\").join("/")];
+});
+
+const precache = () => {
+  const src = readFileSync(join(ROOT, "sw.js"), "utf8");
+  const body = src.match(/const PRECACHE = \[([\s\S]*?)\];/)[1];
+  return JSON.parse("[" + body.replace(/\s+/g, "") + "]");
+};
+
+test("the service worker precaches every shipped asset and nothing stale", () => {
+  const listed = precache();
+  assert.ok(listed.includes("./"), "the bare root must be precached for start_url");
+
+  const onDisk = walk(ROOT).filter(f => !NOT_SHIPPED.has(f)).sort();
+  const cached = listed.filter(u => u !== "./").map(u => u.replace(/^\.\//, "")).sort();
+
+  assert.deepEqual(cached, onDisk,
+    "sw.js PRECACHE has drifted from the files on disk — bump CACHE and fix the list");
+  assert.equal(new Set(cached).size, cached.length, "PRECACHE lists a file twice");
+});
+
+test("the service worker does not precache itself", () => {
+  assert.ok(!precache().some(u => u.endsWith("sw.js")));
+});
+
+test("the manifest points only at assets that exist and are precached", () => {
+  const m = JSON.parse(readFileSync(join(ROOT, "manifest.webmanifest"), "utf8"));
+  const cached = new Set(precache());
+  assert.ok(cached.has(m.start_url), `start_url ${m.start_url} is not precached`);
+  for (const i of m.icons) {
+    assert.ok(cached.has(i.src), `icon ${i.src} is not precached`);
+    assert.ok(readFileSync(join(ROOT, i.src)).length > 0, `icon ${i.src} is empty`);
+  }
+  assert.ok(m.icons.some(i => i.purpose === "maskable"), "no maskable icon");
+  assert.equal(m.display, "standalone");
+});
