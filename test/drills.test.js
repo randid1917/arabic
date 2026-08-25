@@ -229,7 +229,8 @@ const ROOT = fileURLToPath(new URL("..", import.meta.url));
 
 // not part of the installed app: the frozen prototype, the tests, the notes,
 // and sw.js itself, which the browser fetches outside the cache it manages
-const NOT_SHIPPED = new Set(["drills.html", "sw.js", "CLAUDE.md"]);
+// .nojekyll is a GitHub Pages build directive, not an asset the app loads
+const NOT_SHIPPED = new Set(["drills.html", "sw.js", "CLAUDE.md", ".nojekyll"]);
 const NOT_SHIPPED_DIRS = new Set([".git", "test", "node_modules"]);
 
 const walk = dir => readdirSync(dir, { withFileTypes: true }).flatMap(e => {
