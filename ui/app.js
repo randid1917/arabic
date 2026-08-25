@@ -115,6 +115,12 @@ function score(){
   document.getElementById("again").onclick = build;
 }
 
+/* Offline install. Registered from the app rather than index.html so the
+   worker's scope stays the site root — import.meta.url resolves out of ui/. */
+if("serviceWorker" in navigator)
+  addEventListener("load", () =>
+    navigator.serviceWorker.register(new URL("../sw.js", import.meta.url)));
+
 document.getElementById("tab-conj").onclick = () => setMode("conj");
 document.getElementById("tab-sent").onclick = () => setMode("sent");
 function setMode(m){
