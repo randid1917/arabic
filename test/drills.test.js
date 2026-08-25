@@ -186,6 +186,16 @@ test("a stray or dropped b- is wrong, never tax", () => {
   assert.equal(judge("tishrab", ["btishrab"]).state, "wrong");
 });
 
+// ne7na marks the habitual with mn-, not b-. Dropping it after ra7/lazem/fiini
+// is the same grammar miss as a surviving b-, and just as close by distance.
+test("a stray or dropped mn- is wrong, never tax", () => {
+  assert.equal(judge("ra7 mnrou7", ["ra7 nrou7"]).state, "wrong");
+  assert.equal(judge("lazem mnshouf", ["lazem shouf"]).state, "wrong");
+  assert.equal(judge("fiini mnjeeb", ["fiini jeeb"]).state, "wrong");
+  assert.equal(judge("mniktob", ["niktob"]).state, "wrong");
+  assert.equal(judge("naakol", ["mnaakol"]).state, "wrong");  // dropped the other way
+});
+
 test("a stray or dropped ma is wrong, never tax", () => {
   assert.equal(judge("ru7t", ["ma ru7t"]).state, "wrong");
   assert.equal(judge("ma ru7t", ["ru7t"]).state, "wrong");

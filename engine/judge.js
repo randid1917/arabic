@@ -15,15 +15,21 @@ export function lev(a,b){
 const sortedChars = s => s.replace(/\s/g,"").split("").sort().join("");
 const despace = s => s.replace(/\s/g,"");
 
-// The b- of the habitual and the negator ma are grammar, not spelling. A
+// The habitual marker and the negator ma are grammar, not spelling. A
 // difference in either is always a real miss however small the edit distance:
 // `ra7 brou7` for `ra7 rou7` is exactly the error these drills exist to catch,
-// and it sits one character from correct. Counted, not aligned, so a missing
-// space cannot shift the reading.
+// and it sits one character from correct. ne7na marks the habitual with mn-
+// rather than b- (mnrou7 against nrou7), so it is the same error and counted
+// the same way. Counted, not aligned, so a missing space cannot shift the
+// reading.
 const markers = s => {
   const w = normalise(s).split(" ").filter(Boolean);
-  return w.filter(x => x === "ma").length + ":" +
-         w.filter(x => x !== "ma" && x.startsWith("b")).length;
+  const verbs = w.filter(x => x !== "ma");
+  return [
+    w.filter(x => x === "ma").length,
+    verbs.filter(x => x.startsWith("b")).length,
+    verbs.filter(x => x.startsWith("mn")).length
+  ].join(":");
 };
 
 // "typing tax": one transposition or one doubled/dropped letter in a word
